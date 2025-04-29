@@ -1,6 +1,6 @@
 # Explicação do Script de Backup - Exercício 1
 
-Script automatiza o processo de criação de um backup dos diretórios especificados. Tomei a liberdade de melhorar o código feito em aula, colocando em prática os conceitos que foram aprendidos e as referências disponibilizadas (utilização de IF principalmente e um pouco de "log" em formato de echo para acompanhar o processo).
+Script que automatiza o processo de criação de um backup dos diretórios especificados. Tomei a liberdade de melhorar o código feito em aula, colocando em prática os conceitos que foram aprendidos e as referências disponibilizadas (utilização de IF principalmente e um pouco de "log" em formato de echo para acompanhar o processo).
 
 1. **Nome do arquivo**:
 
