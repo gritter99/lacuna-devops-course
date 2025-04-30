@@ -1,15 +1,17 @@
 # Documentação do Script generate-git-project.sh
 
 ## Objetivo da atividade
+
 O script generate-git-project.sh tem como objetivo automatizar a criação de um novo projeto web api em Python usando um repositório de template (no caso, meu repositório da api de receitas). Ele realiza a configuração inicial do projeto, ajusta arquivos específicos para o contexto de desenvolvimento em Python e prepara o ambiente para desenvolvimento.
 
 Como eu fiz a api de receitas em typescript, tive que fazer alguns ajustes como apagar os arquivos .ts e de configurações node.
 
 ### Explicação
+
 1. Entrada de Dados
 
 O script aceita o nome do projeto como argumento ou solicita ao usuário que insira o nome manualmente.
-Fiz uma validação simples no nome do projeto para garantir que ele contenha apenas caracteres permitidos (letras, números, _ ou -).
+Fiz uma validação simples no nome do projeto para garantir que ele contenha apenas caracteres permitidos (letras, números, \_ ou -).
 
 2. Configuração do Projeto
 
@@ -37,9 +39,11 @@ make build: Construir a imagem Docker. - adicionei por ser interessante a titulo
 make clean: Limpar arquivos temporários. - testei e funciona
 
 5. Finalização
+
 Exibe uma mensagem de sucesso com instruções para acessar o diretório do projeto e instalar as dependências.
 
 As fontes utilizadas foram:
+
 [Create and activate a virtual environment on Git Bash](https://stackoverflow.com/questions/56442408/cannot-create-and-activate-a-virtual-environment-on-git-bash-with-python-2-7-wi) - tive mais dificuldade nessa parte
 
 [Bash cheat-sheets](https://kapeli.com/cheat_sheets/Bash_Test_Operators.docset/Contents/Resources/Documents/index) - utilizei para pegar as lógicas de "if" principalmente
