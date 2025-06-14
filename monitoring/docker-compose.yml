@@ -10,6 +10,9 @@ networks:
     driver: bridge
   loki:
     driver: bridge
+  monitoring-net:
+    external: true
+
 services:
   grafana:
     image: grafana/grafana:11.6.2
@@ -23,6 +26,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor metricsSummary
+      - GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app
     volumes:
       - grafana_data:/var/lib/grafana
       - ./config/grafana/grafana.ini:/etc/grafana/grafana.ini
@@ -44,7 +49,8 @@ services:
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=60d"
       - "--web.enable-remote-write-receiver"
-      - "--enable-feature=native_histograms"
+      - "--enable-feature=native-histograms"
+      - "--enable-feature=exemplar-storage"
       - "--web.console.libraries=/usr/share/prometheus/console_libraries"
       - "--web.console.templates=/usr/share/prometheus/consoles"
 
@@ -70,6 +76,10 @@ services:
       loki:
         aliases:
           - loki
+      monitoring-net:
+        aliases:
+          - monitoring-net
+    
     command:
       - "-config.file=/etc/loki/local-config.yaml"
     volumes:
@@ -91,7 +101,58 @@ services:
       - "9080:9080"
     networks:
       - loki
+      - monitoring-net
     command:
       - "-config.file=/etc/promtail/config.yml"
     volumes:
-      - /var/log:/var/log
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/promtail/config.yml:/etc/promtail/config.yml 
+  
+  init-tempo:
+    image: &tempoImage grafana/tempo:2.8.0
+    user: root
+    entrypoint: 
+    - "chown"
+    - "10001:10001"
+    - "/var/tempo"
+    volumes:
+      - ./tempo_data:/var/tempo
+  
+  memcached:
+    image: memcached:1.6.38
+    container_name: memcached
+    restart: on-failure
+    ports:
+      - "11211:11211"
+    environment:
+      - MEMCACHED_MAX_MEMORY=64m
+      - MEMCACHED_THREADS=4
+    networks:
+      - monitoring
+
+  tempo:
+    image: *tempoImage
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./config/tempo/tempo.yaml:/etc/tempo.yaml
+      - ./tempo_data:/var/tempo
+    ports:
+      - "4318:4318" 
+      - "4317:4317"
+    restart: on-failure
+    depends_on:
+      - init-tempo
+      - memcached
+    networks:
+      - monitoring
+      - monitoring-net
+
+  k6-tracing:
+    image: ghcr.io/grafana/xk6-client-tracing:v0.0.7
+    environment:
+      - ENDPOINT=tempo:4317
+    restart: always
+    depends_on:
+      - tempo
+    networks:
+      - monitoring
